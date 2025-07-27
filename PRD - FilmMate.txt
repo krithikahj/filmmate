@@ -1,0 +1,61 @@
+﻿FilmMate Prototype Development Prompt
+Create an interactive web prototype for a film photography assistant application called "Filmate" with the following specifications:
+
+
+Overview
+FilmMate helps novice film photographers determine optimal camera settings based on their equipment and shooting conditions. The app should combine camera specifications, lens characteristics, film properties, and lighting conditions to recommend appropriate aperture and shutter speed settings.
+
+
+Core Structure
+Design the application using object-oriented principles with these primary classes:
+
+
+Camera: Stores camera body specifications including available shutter speeds
+Lens: Contains lens properties and available aperture values
+FilmStock: Represents different film types and their characteristics
+LightingCondition: Different lighting scenarios with corresponding EV ranges
+ExposureCalculator: Contains the logic for calculating optimal settings
+ShotLog: Records of photos taken with specific settings
+ShotLogManager: Handles the storage and retrieval of shot logs
+Main Views
+Settings Selection Screen:
+Camera selection dropdown (initially only Canon AE-1)
+Lens selection dropdown with common Canon FD lenses
+Film stock selection with popular options
+Lighting condition selector
+Generated Settings Screen:
+Display recommended aperture, shutter speed and ISO
+Show alternative setting combinations
+Option to log the shot
+Return to settings option
+Shot Log Management Screen:
+List of previously logged photos
+Filtering and sorting capabilities
+Detailed view of individual logs
+Manual log entry functionality
+Core Functionality
+The heart of the application should be the exposure calculation system that:
+
+
+Takes the selected ISO from the film stock
+Uses the EV (Exposure Value) from the selected lighting condition
+Considers available apertures from the selected lens
+Considers available shutter speeds from the selected camera
+Calculates all valid exposure combinations
+Recommends the optimal combination plus alternatives
+The calculation should follow standard photographic principles where:
+
+
+The Sunny 16 rule serves as baseline (at EV 15, correct exposure is f/16 at 1/ISO)
+For each stop of light, either double the exposure time or open aperture by one stop
+Formula: 2^EV = (aperture^2 × 100) / (ISO × shutterSpeed)
+
+User Experience
+Intuitive interface for beginners
+Educational elements that explain why certain settings are recommended
+Simple navigation between the three main screens
+Responsive design for both mobile and desktop use
+Technical Specifications
+Store user data in local browser storage
+Initial database should include the Canon AE-1, common Canon FD lenses, popular film stocks, and standard lighting conditions as specified in the requirements document
+Develop this prototype focusing on the core functionality and clear user experience to help novice film photographers make better exposure decisions.
