@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { FilmMateProvider } from './context/FilmMateContext'
 import { Navigation, Screen } from './components/Navigation'
 import { SettingsScreen } from './components/SettingsScreen'
 import { GeneratedSettingsScreen } from './components/GeneratedSettingsScreen'
 import { ShotLogScreen } from './components/ShotLogScreen'
 import { UsernameScreen } from './components/UsernameScreen'
+import { UserSwitchModal } from './components/UserSwitchModal'
 import { useFilmMate } from './context/FilmMateContext'
 import { testDatabaseConnection } from './services/database'
 import './App.css'
-
-
 
 // Local storage key for username
 const USERNAME_STORAGE_KEY = 'filmate-username'
@@ -19,7 +18,8 @@ function AppContent() {
   const [canShowGenerated, setCanShowGenerated] = useState(false)
   const [username, setUsername] = useState<string | null>(null)
   const [isLoadingUsername, setIsLoadingUsername] = useState(true)
-  const { setUsername: setContextUsername } = useFilmMate()
+  const [showUserSwitchModal, setShowUserSwitchModal] = useState(false)
+  const { setUsername: setContextUsername, clearAllData } = useFilmMate()
 
   // Load username from localStorage on component mount
   useEffect(() => {
@@ -36,6 +36,7 @@ function AppContent() {
         }
       } catch (error) {
         // Continue with app even if database test fails
+        console.warn('Database connection test failed:', error)
       } finally {
         setIsLoadingUsername(false)
       }
@@ -45,24 +46,56 @@ function AppContent() {
   }, [setContextUsername])
 
   // Handle username setup
-  const handleUsernameSet = (newUsername: string) => {
+  const handleUsernameSet = useCallback((newUsername: string) => {
     try {
       localStorage.setItem(USERNAME_STORAGE_KEY, newUsername)
       setUsername(newUsername)
       setContextUsername(newUsername)
     } catch (error) {
-      // Handle localStorage error silently
+      console.error('Failed to save username to localStorage:', error)
     }
-  }
+  }, [setContextUsername])
 
-  const handleScreenChange = (screen: Screen) => {
+  // Handle user switching
+  const handleSwitchUser = useCallback((newUsername: string) => {
+    try {
+      // Clear current user's selections and data
+      clearAllData()
+      
+      // Update localStorage
+      localStorage.setItem(USERNAME_STORAGE_KEY, newUsername)
+      
+      // Update state
+      setUsername(newUsername)
+      setContextUsername(newUsername)
+      
+      // Reset app state
+      setCurrentScreen('settings')
+      setCanShowGenerated(false)
+      
+      // Close modal
+      setShowUserSwitchModal(false)
+    } catch (error) {
+      console.error('Error switching user:', error)
+    }
+  }, [clearAllData, setContextUsername])
+
+  const handleScreenChange = useCallback((screen: Screen) => {
     setCurrentScreen(screen)
-  }
+  }, [])
 
-  const handleNavigateToResults = () => {
+  const handleNavigateToResults = useCallback(() => {
     setCurrentScreen('generated')
     setCanShowGenerated(true)
-  }
+  }, [])
+
+  const handleOpenUserSwitch = useCallback(() => {
+    setShowUserSwitchModal(true)
+  }, [])
+
+  const handleCloseUserSwitch = useCallback(() => {
+    setShowUserSwitchModal(false)
+  }, [])
 
   // Show loading state while checking for saved username
   if (isLoadingUsername) {
@@ -86,7 +119,6 @@ function AppContent() {
   }
 
   const renderCurrentScreen = () => {
-    
     switch (currentScreen) {
       case 'settings':
         return (
@@ -114,22 +146,26 @@ function AppContent() {
       <header className="App-header">
         <h1>FilmMate</h1>
         <p>Film Photography Exposure Assistant</p>
-        {username && (
-          <div className="user-info">
-            <span className="username-display">Welcome, {username}</span>
-          </div>
-        )}
       </header>
       
       <Navigation 
         currentScreen={currentScreen}
         onScreenChange={handleScreenChange}
         canShowGenerated={canShowGenerated}
+        onSwitchUser={handleOpenUserSwitch}
+        currentUsername={username}
       />
       
-      <main>
+      <main role="main">
         {renderCurrentScreen()}
       </main>
+
+      <UserSwitchModal
+        isOpen={showUserSwitchModal}
+        onClose={handleCloseUserSwitch}
+        onSwitchUser={handleSwitchUser}
+        currentUsername={username}
+      />
     </div>
   )
 }

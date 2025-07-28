@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode, useCallback, useState, useEffect } from 'react'
+import { createContext, useContext, useReducer, ReactNode, useCallback, useState, useEffect } from 'react'
 import { AppState, Camera, Lens, FilmStock, LightingCondition, ShotLog, CreateShotLog } from '../types'
 import { ExposureCalculator, ExposureCalculationResult } from '../utils/exposureCalculator'
 import { saveShotLog, updateShotLog as updateShotLogInDB, loadShotLogs as loadShotLogsFromDB } from '../services/database'
@@ -24,6 +24,7 @@ type Action =
   | { type: 'UPDATE_SHOT_LOG'; payload: ShotLog }
   | { type: 'LOAD_SHOT_LOGS'; payload: ShotLog[] }
   | { type: 'CLEAR_SELECTIONS' }
+  | { type: 'CLEAR_ALL_DATA' }
 
 // Reducer function
 function filmMateReducer(state: AppState, action: Action): AppState {
@@ -55,6 +56,15 @@ function filmMateReducer(state: AppState, action: Action): AppState {
         selectedFilmStock: null,
         selectedLightingCondition: null
       }
+    case 'CLEAR_ALL_DATA':
+      return {
+        ...state,
+        selectedCamera: null,
+        selectedLens: null,
+        selectedFilmStock: null,
+        selectedLightingCondition: null,
+        shotLogs: []
+      }
     default:
       return state
   }
@@ -73,6 +83,7 @@ interface FilmMateContextType {
   updateShotLog: (shotLog: ShotLog) => Promise<void>
   loadShotLogs: () => Promise<void>
   clearSelections: () => void
+  clearAllData: () => void
   calculateExposure: () => ExposureCalculationResult | null
   isReadyToCalculate: () => boolean
 }
@@ -176,6 +187,10 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     dispatch({ type: 'CLEAR_SELECTIONS' })
   }, [])
 
+  const clearAllData = useCallback(() => {
+    dispatch({ type: 'CLEAR_ALL_DATA' })
+  }, [])
+
   // Calculate exposure if all inputs are selected
   const calculateExposure = useCallback((): ExposureCalculationResult | null => {
     if (!isReadyToCalculate()) {
@@ -217,6 +232,7 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     updateShotLog,
     loadShotLogs,
     clearSelections,
+    clearAllData,
     calculateExposure,
     isReadyToCalculate
   }

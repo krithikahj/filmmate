@@ -10,11 +10,15 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .nav-tabs {
   display: flex;
   gap: 0;
+  flex: 1;
 }
 
 .nav-tab {
@@ -55,14 +59,89 @@
   background-color: transparent;
 }
 
+.nav-user-section {
+  display: flex;
+  align-items: center;
+}
+
+.user-switch-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 2.5rem;
+}
+
+.user-switch-btn:hover {
+  background: #3a3a3a;
+  border-color: #555;
+  color: #ffffff;
+}
+
+.user-switch-btn:focus {
+  outline: none;
+  border-color: #4a9eff;
+  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.3);
+}
+
+.user-icon {
+  font-size: 1rem;
+}
+
+.current-user {
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.switch-icon {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .nav-container {
     padding: 0 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
   
   .nav-tab {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+  }
+
+  .user-switch-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .current-user {
+    max-width: 80px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .user-switch-btn {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab,
+  .user-switch-btn {
+    transition: none;
   }
 } 
