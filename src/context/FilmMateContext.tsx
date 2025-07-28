@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react'
 import { AppState, Camera, Lens, FilmStock, LightingCondition, ShotLog } from '../types'
 import { ExposureCalculator, ExposureCalculationResult } from '../utils/exposureCalculator'
 
@@ -85,31 +85,31 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
   const exposureCalculator = new ExposureCalculator()
 
   // Action creators
-  const setCamera = (camera: Camera) => {
+  const setCamera = useCallback((camera: Camera) => {
     dispatch({ type: 'SET_CAMERA', payload: camera })
-  }
+  }, [])
 
-  const setLens = (lens: Lens) => {
+  const setLens = useCallback((lens: Lens) => {
     dispatch({ type: 'SET_LENS', payload: lens })
-  }
+  }, [])
 
-  const setFilmStock = (filmStock: FilmStock) => {
+  const setFilmStock = useCallback((filmStock: FilmStock) => {
     dispatch({ type: 'SET_FILM_STOCK', payload: filmStock })
-  }
+  }, [])
 
-  const setLightingCondition = (lightingCondition: LightingCondition) => {
+  const setLightingCondition = useCallback((lightingCondition: LightingCondition) => {
     dispatch({ type: 'SET_LIGHTING_CONDITION', payload: lightingCondition })
-  }
+  }, [])
 
-  const addShotLog = (shotLog: ShotLog) => {
+  const addShotLog = useCallback((shotLog: ShotLog) => {
     dispatch({ type: 'ADD_SHOT_LOG', payload: shotLog })
     // Save to localStorage
     const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
     const updatedLogs = [shotLog, ...existingLogs]
     localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
-  }
+  }, [])
 
-  const updateShotLog = (shotLog: ShotLog) => {
+  const updateShotLog = useCallback((shotLog: ShotLog) => {
     dispatch({ type: 'UPDATE_SHOT_LOG', payload: shotLog })
     // Update localStorage
     const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
@@ -117,18 +117,18 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
       log.id === shotLog.id ? shotLog : log
     )
     localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
-  }
+  }, [])
 
-  const loadShotLogs = (shotLogs: ShotLog[]) => {
+  const loadShotLogs = useCallback((shotLogs: ShotLog[]) => {
     dispatch({ type: 'LOAD_SHOT_LOGS', payload: shotLogs })
-  }
+  }, [])
 
-  const clearSelections = () => {
+  const clearSelections = useCallback(() => {
     dispatch({ type: 'CLEAR_SELECTIONS' })
-  }
+  }, [])
 
   // Calculate exposure if all inputs are selected
-  const calculateExposure = (): ExposureCalculationResult | null => {
+  const calculateExposure = useCallback((): ExposureCalculationResult | null => {
     if (!isReadyToCalculate()) {
       return null
     }
@@ -144,17 +144,17 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
       console.error('Error calculating exposure:', error)
       return null
     }
-  }
+  }, [state.selectedCamera, state.selectedLens, state.selectedFilmStock, state.selectedLightingCondition])
 
   // Check if all required inputs are selected
-  const isReadyToCalculate = (): boolean => {
+  const isReadyToCalculate = useCallback((): boolean => {
     return !!(
       state.selectedCamera &&
       state.selectedLens &&
       state.selectedFilmStock &&
       state.selectedLightingCondition
     )
-  }
+  }, [state.selectedCamera, state.selectedLens, state.selectedFilmStock, state.selectedLightingCondition])
 
   const value: FilmMateContextType = {
     state,

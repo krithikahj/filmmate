@@ -22,7 +22,7 @@ export function ShotLogScreen() {
         console.error('Error loading shot logs:', error)
       }
     }
-  }, [loadShotLogs])
+  }, [loadShotLogs]) // Added loadShotLogs back since it's now memoized
 
   // Sort logs by date (newest first)
   useEffect(() => {
