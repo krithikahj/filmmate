@@ -8,21 +8,17 @@ export function ShotLogScreen() {
   const [filteredLogs, setFilteredLogs] = useState<ShotLog[]>([])
   const [selectedLog, setSelectedLog] = useState<ShotLog | null>(null)
 
-  // Load shot logs from localStorage on component mount
+  // Load shot logs from database on component mount
   useEffect(() => {
-    const savedLogs = localStorage.getItem('filmate-shot-logs')
-    if (savedLogs) {
+    const loadLogs = async () => {
       try {
-        const parsedLogs = JSON.parse(savedLogs).map((log: any) => ({
-          ...log,
-          timestamp: new Date(log.timestamp)
-        }))
-        loadShotLogs(parsedLogs)
+        await loadShotLogs()
       } catch (error) {
         console.error('Error loading shot logs:', error)
       }
     }
-  }, [loadShotLogs]) // Added loadShotLogs back since it's now memoized
+    loadLogs()
+  }, [loadShotLogs])
 
   // Sort logs by date (newest first)
   useEffect(() => {
@@ -50,11 +46,15 @@ export function ShotLogScreen() {
     }
   }
 
-  const handleRatingChange = (logId: string, rating: number) => {
+  const handleRatingChange = async (logId: string, rating: number) => {
     const updatedLog = state.shotLogs.find(log => log.id === logId)
     if (updatedLog) {
       const newLog = { ...updatedLog, rating }
-      updateShotLog(newLog)
+      try {
+        await updateShotLog(newLog)
+      } catch (error) {
+        console.error('Error updating shot log rating:', error)
+      }
     }
   }
 

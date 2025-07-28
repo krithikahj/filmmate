@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react'
-import { AppState, Camera, Lens, FilmStock, LightingCondition, ShotLog } from '../types'
+import React, { createContext, useContext, useReducer, ReactNode, useCallback, useState, useEffect } from 'react'
+import { AppState, Camera, Lens, FilmStock, LightingCondition, ShotLog, CreateShotLog } from '../types'
 import { ExposureCalculator, ExposureCalculationResult } from '../utils/exposureCalculator'
+import { saveShotLog, updateShotLog as updateShotLogInDB, loadShotLogs as loadShotLogsFromDB } from '../services/database'
+
+
 
 // Initial state
 const initialState: AppState = {
@@ -60,13 +63,15 @@ function filmMateReducer(state: AppState, action: Action): AppState {
 // Context interface
 interface FilmMateContextType {
   state: AppState
+  username: string | null
+  setUsername: (username: string) => void
   setCamera: (camera: Camera) => void
   setLens: (lens: Lens) => void
   setFilmStock: (filmStock: FilmStock) => void
   setLightingCondition: (lightingCondition: LightingCondition) => void
-  addShotLog: (shotLog: ShotLog) => void
-  updateShotLog: (shotLog: ShotLog) => void
-  loadShotLogs: (shotLogs: ShotLog[]) => void
+  addShotLog: (shotLog: CreateShotLog) => Promise<void>
+  updateShotLog: (shotLog: ShotLog) => Promise<void>
+  loadShotLogs: () => Promise<void>
   clearSelections: () => void
   calculateExposure: () => ExposureCalculationResult | null
   isReadyToCalculate: () => boolean
@@ -82,7 +87,13 @@ interface FilmMateProviderProps {
 
 export function FilmMateProvider({ children }: FilmMateProviderProps) {
   const [state, dispatch] = useReducer(filmMateReducer, initialState)
+  const [username, setUsernameState] = useState<string | null>(null)
   const exposureCalculator = new ExposureCalculator()
+
+  // Debug provider mount
+  useEffect(() => {
+    // Component mounted
+  }, [])
 
   // Action creators
   const setCamera = useCallback((camera: Camera) => {
@@ -101,27 +112,65 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     dispatch({ type: 'SET_LIGHTING_CONDITION', payload: lightingCondition })
   }, [])
 
-  const addShotLog = useCallback((shotLog: ShotLog) => {
-    dispatch({ type: 'ADD_SHOT_LOG', payload: shotLog })
-    // Save to localStorage
-    const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
-    const updatedLogs = [shotLog, ...existingLogs]
-    localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
+  // Set username for database operations
+  const setUsername = useCallback((newUsername: string) => {
+    setUsernameState(newUsername)
   }, [])
 
-  const updateShotLog = useCallback((shotLog: ShotLog) => {
-    dispatch({ type: 'UPDATE_SHOT_LOG', payload: shotLog })
-    // Update localStorage
-    const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
-    const updatedLogs = existingLogs.map((log: any) => 
-      log.id === shotLog.id ? shotLog : log
-    )
-    localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
-  }, [])
+  const addShotLog = useCallback(async (shotLog: CreateShotLog) => {
+    if (!username) {
+      throw new Error('Username not set')
+    }
 
-  const loadShotLogs = useCallback((shotLogs: ShotLog[]) => {
-    dispatch({ type: 'LOAD_SHOT_LOGS', payload: shotLogs })
-  }, [])
+    try {
+      // Generate a temporary ID for local state if not provided
+      const shotLogWithId: ShotLog = {
+        ...shotLog,
+        id: shotLog.id || `temp-${Date.now()}`
+      }
+      
+      // Update local state immediately for responsive UI
+      dispatch({ type: 'ADD_SHOT_LOG', payload: shotLogWithId })
+      
+      // Save to database
+      await saveShotLog(username, shotLog)
+    } catch (error) {
+      // Revert local state on error
+      dispatch({ type: 'LOAD_SHOT_LOGS', payload: state.shotLogs })
+      throw error
+    }
+  }, [username, state.shotLogs])
+
+  const updateShotLog = useCallback(async (shotLog: ShotLog) => {
+    if (!username) {
+      throw new Error('Username not set')
+    }
+
+    try {
+      // Update local state immediately for responsive UI
+      dispatch({ type: 'UPDATE_SHOT_LOG', payload: shotLog })
+      
+      // Update in database
+      await updateShotLogInDB(username, shotLog)
+    } catch (error) {
+      // Revert local state on error
+      dispatch({ type: 'LOAD_SHOT_LOGS', payload: state.shotLogs })
+      throw error
+    }
+  }, [username, state.shotLogs])
+
+  const loadShotLogs = useCallback(async () => {
+    if (!username) {
+      return
+    }
+
+    try {
+      const shotLogs = await loadShotLogsFromDB(username)
+      dispatch({ type: 'LOAD_SHOT_LOGS', payload: shotLogs })
+    } catch (error) {
+      throw error
+    }
+  }, [username])
 
   const clearSelections = useCallback(() => {
     dispatch({ type: 'CLEAR_SELECTIONS' })
@@ -158,6 +207,8 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
 
   const value: FilmMateContextType = {
     state,
+    username,
+    setUsername,
     setCamera,
     setLens,
     setFilmStock,

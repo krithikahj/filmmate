@@ -44,6 +44,21 @@ export interface ShotLog {
   rating?: number // 1-5 stars, optional
 }
 
+// For creating new shot logs (without ID)
+export interface CreateShotLog {
+  id?: string // Optional - database will generate if not provided
+  timestamp: Date
+  camera: Camera
+  lens: Lens
+  filmStock: FilmStock
+  lightingCondition: LightingCondition
+  recommendedSettings: ExposureSettings
+  alternativeSettings: ExposureSettings[]
+  selectedSettings: ExposureSettings
+  notes?: string
+  rating?: number
+}
+
 export interface AppState {
   selectedCamera: Camera | null
   selectedLens: Lens | null

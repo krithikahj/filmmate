@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useFilmMate } from '../context/FilmMateContext'
-import { ExposureSettings } from '../types'
+import { ExposureSettings, CreateShotLog } from '../types'
 import './GeneratedSettingsScreen.css'
+
+
 
 export function GeneratedSettingsScreen() {
   const { state, calculateExposure, addShotLog } = useFilmMate()
@@ -22,13 +24,12 @@ export function GeneratedSettingsScreen() {
     )
   }
 
-  const handleLogShot = () => {
+  const handleLogShot = async () => {
     if (!state.selectedCamera || !state.selectedLens || !state.selectedFilmStock || !state.selectedLightingCondition || !selectedSettings) {
       return
     }
 
-    const shotLog = {
-      id: Date.now().toString(),
+    const shotLog: CreateShotLog = {
       timestamp: new Date(),
       camera: state.selectedCamera,
       lens: state.selectedLens,
@@ -40,10 +41,14 @@ export function GeneratedSettingsScreen() {
       notes: notes.trim() || undefined
     }
 
-    addShotLog(shotLog)
-    setNotes('')
-    setShowLogForm(false)
-    setSelectedSettings(null)
+    try {
+      await addShotLog(shotLog)
+      setNotes('')
+      setShowLogForm(false)
+      setSelectedSettings(null)
+    } catch (error) {
+      alert('Failed to save shot log. Please try again.')
+    }
   }
 
   const handleSelectSettings = (settings: ExposureSettings) => {
