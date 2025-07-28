@@ -164,12 +164,12 @@ export function GeneratedSettingsScreen() {
                 <p><strong>Selected:</strong> f/{selectedSettings.aperture} • {formatShutterSpeed(selectedSettings.shutterSpeed)} • ISO {selectedSettings.iso}</p>
               </div>
               <div className="notes-section">
-                <label htmlFor="notes">Add Notes (Optional)</label>
+                <label htmlFor="notes">Photo Description (Optional)</label>
                 <textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes about this shot..."
+                  placeholder="Describe the shot..."
                   rows={3}
                   maxLength={500}
                 />
