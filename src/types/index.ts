@@ -41,6 +41,7 @@ export interface ShotLog {
   alternativeSettings: ExposureSettings[]
   selectedSettings: ExposureSettings
   notes?: string
+  rating?: number // 1-5 stars, optional
 }
 
 export interface AppState {

@@ -18,6 +18,7 @@ type Action =
   | { type: 'SET_FILM_STOCK'; payload: FilmStock }
   | { type: 'SET_LIGHTING_CONDITION'; payload: LightingCondition }
   | { type: 'ADD_SHOT_LOG'; payload: ShotLog }
+  | { type: 'UPDATE_SHOT_LOG'; payload: ShotLog }
   | { type: 'LOAD_SHOT_LOGS'; payload: ShotLog[] }
   | { type: 'CLEAR_SELECTIONS' }
 
@@ -34,6 +35,13 @@ function filmMateReducer(state: AppState, action: Action): AppState {
       return { ...state, selectedLightingCondition: action.payload }
     case 'ADD_SHOT_LOG':
       return { ...state, shotLogs: [action.payload, ...state.shotLogs] }
+    case 'UPDATE_SHOT_LOG':
+      return {
+        ...state,
+        shotLogs: state.shotLogs.map(log => 
+          log.id === action.payload.id ? action.payload : log
+        )
+      }
     case 'LOAD_SHOT_LOGS':
       return { ...state, shotLogs: action.payload }
     case 'CLEAR_SELECTIONS':
@@ -57,6 +65,7 @@ interface FilmMateContextType {
   setFilmStock: (filmStock: FilmStock) => void
   setLightingCondition: (lightingCondition: LightingCondition) => void
   addShotLog: (shotLog: ShotLog) => void
+  updateShotLog: (shotLog: ShotLog) => void
   loadShotLogs: (shotLogs: ShotLog[]) => void
   clearSelections: () => void
   calculateExposure: () => ExposureCalculationResult | null
@@ -97,6 +106,16 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     // Save to localStorage
     const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
     const updatedLogs = [shotLog, ...existingLogs]
+    localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
+  }
+
+  const updateShotLog = (shotLog: ShotLog) => {
+    dispatch({ type: 'UPDATE_SHOT_LOG', payload: shotLog })
+    // Update localStorage
+    const existingLogs = JSON.parse(localStorage.getItem('filmate-shot-logs') || '[]')
+    const updatedLogs = existingLogs.map((log: any) => 
+      log.id === shotLog.id ? shotLog : log
+    )
     localStorage.setItem('filmate-shot-logs', JSON.stringify(updatedLogs))
   }
 
@@ -144,6 +163,7 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     setFilmStock,
     setLightingCondition,
     addShotLog,
+    updateShotLog,
     loadShotLogs,
     clearSelections,
     calculateExposure,

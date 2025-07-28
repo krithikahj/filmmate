@@ -376,6 +376,54 @@
   margin: 0;
 }
 
+/* Star Rating Component */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.star {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: #404040;
+}
+
+.star:hover {
+  transform: scale(1.1);
+  color: #ffd700;
+}
+
+.star.filled {
+  color: #ffd700;
+}
+
+.star.empty {
+  color: #404040;
+}
+
+.star:disabled {
+  cursor: default;
+  transform: none;
+}
+
+.rating-text {
+  color: #888888;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.log-rating {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #404040;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .shot-log-screen {

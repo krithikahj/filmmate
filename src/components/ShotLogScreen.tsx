@@ -4,10 +4,9 @@ import { ShotLog } from '../types'
 import './ShotLogScreen.css'
 
 export function ShotLogScreen() {
-  const { state, loadShotLogs } = useFilmMate()
+  const { state, loadShotLogs, updateShotLog } = useFilmMate()
   const [filteredLogs, setFilteredLogs] = useState<ShotLog[]>([])
   const [selectedLog, setSelectedLog] = useState<ShotLog | null>(null)
-  const [sortBy, setSortBy] = useState<'date' | 'camera' | 'film'>('date')
 
   // Load shot logs from localStorage on component mount
   useEffect(() => {
@@ -25,26 +24,13 @@ export function ShotLogScreen() {
     }
   }, [loadShotLogs])
 
-  // Sort logs
+  // Sort logs by date (newest first)
   useEffect(() => {
-    let logs = [...state.shotLogs]
-
-    // Apply sorting
-    logs.sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        case 'camera':
-          return a.camera.name.localeCompare(b.camera.name)
-        case 'film':
-          return a.filmStock.name.localeCompare(b.filmStock.name)
-        default:
-          return 0
-      }
+    const logs = [...state.shotLogs].sort((a, b) => {
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     })
-
     setFilteredLogs(logs)
-  }, [state.shotLogs, sortBy])
+  }, [state.shotLogs])
 
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat('en-US', {
@@ -64,6 +50,42 @@ export function ShotLogScreen() {
     }
   }
 
+  const handleRatingChange = (logId: string, rating: number) => {
+    const updatedLog = state.shotLogs.find(log => log.id === logId)
+    if (updatedLog) {
+      const newLog = { ...updatedLog, rating }
+      updateShotLog(newLog)
+    }
+  }
+
+  const StarRating = ({ rating, onRatingChange, readonly = false }: { 
+    rating?: number; 
+    onRatingChange?: (rating: number) => void;
+    readonly?: boolean;
+  }) => {
+    const stars = [1, 2, 3, 4, 5]
+    
+    return (
+      <div className="star-rating">
+        {stars.map((star) => (
+          <button
+            key={star}
+            type="button"
+            className={`star ${rating && rating >= star ? 'filled' : 'empty'}`}
+            onClick={() => !readonly && onRatingChange?.(star)}
+            disabled={readonly}
+            aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+          >
+            ★
+          </button>
+        ))}
+        {rating && (
+          <span className="rating-text">({rating}/5)</span>
+        )}
+      </div>
+    )
+  }
+
   const LogCard = ({ log, onClick }: { log: ShotLog; onClick: () => void }) => (
     <div className="log-card" onClick={onClick}>
       <div className="log-header">
@@ -79,6 +101,12 @@ export function ShotLogScreen() {
           <span className="selected-settings">
             <strong>Selected:</strong> f/{log.selectedSettings.aperture} • {formatShutterSpeed(log.selectedSettings.shutterSpeed)}
           </span>
+        </div>
+        <div className="log-rating" onClick={(e) => e.stopPropagation()}>
+          <StarRating 
+            rating={log.rating} 
+            onRatingChange={(rating) => handleRatingChange(log.id, rating)}
+          />
         </div>
       </div>
       {log.notes && (
@@ -101,6 +129,14 @@ export function ShotLogScreen() {
           <div className="detail-section">
             <h3>Date & Time</h3>
             <p>{formatDate(log.timestamp)}</p>
+          </div>
+
+          <div className="detail-section">
+            <h3>Rating</h3>
+            <StarRating 
+              rating={log.rating} 
+              onRatingChange={(rating) => handleRatingChange(log.id, rating)}
+            />
           </div>
 
           <div className="detail-section">
@@ -195,23 +231,6 @@ export function ShotLogScreen() {
         <div className="log-header-section">
           <h2>Shot Log</h2>
           <p>View and manage your saved exposure settings</p>
-        </div>
-
-        {/* Sort Controls */}
-        <div className="controls">
-          <div className="sort-controls">
-            <label htmlFor="sort-select">Sort by:</label>
-            <select
-              id="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'camera' | 'film')}
-              className="sort-select"
-            >
-              <option value="date">Date</option>
-              <option value="camera">Camera</option>
-              <option value="film">Film</option>
-            </select>
-          </div>
         </div>
 
         {/* Logs List */}
