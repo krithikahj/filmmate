@@ -1,15 +1,35 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useFilmMate } from '../context/FilmMateContext'
 import { ExposureSettings, CreateShotLog } from '../types'
 import './GeneratedSettingsScreen.css'
 
+// Constants
+const NOTES_MAX_LENGTH = 500
+const ISO_BASE_VALUE = 100
 
+// Add this helper function at the top
+const formatExposureDelta = (delta?: number): string => {
+  if (delta === undefined || delta === 0) {
+    return 'Perfect Exposure'
+  }
+  const sign = delta > 0 ? '+' : ''
+  return `${sign}${delta}`
+}
+
+// Function to calculate exposure delta for custom settings
+const calculateExposureDelta = (aperture: number, shutterSpeed: number, iso: number, targetEV: number): number => {
+  const shutter = 1 / shutterSpeed
+  const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / ISO_BASE_VALUE)
+  const delta = actualExposureValue - targetEV
+  return parseFloat(delta.toFixed(2))
+}
 
 export function GeneratedSettingsScreen() {
   const { state, calculateExposure, addShotLog } = useFilmMate()
   const [notes, setNotes] = useState('')
   const [showLogForm, setShowLogForm] = useState(false)
   const [selectedSettings, setSelectedSettings] = useState<ExposureSettings | null>(null)
+  const [editableSettings, setEditableSettings] = useState<ExposureSettings | null>(null)
 
   const exposureResult = calculateExposure()
 
@@ -25,7 +45,7 @@ export function GeneratedSettingsScreen() {
   }
 
   const handleLogShot = async () => {
-    if (!state.selectedCamera || !state.selectedLens || !state.selectedFilmStock || !state.selectedLightingCondition || !selectedSettings) {
+    if (!state.selectedCamera || !state.selectedLens || !state.selectedFilmStock || !state.selectedLightingCondition || !editableSettings || !selectedSettings) {
       return
     }
 
@@ -37,7 +57,8 @@ export function GeneratedSettingsScreen() {
       lightingCondition: state.selectedLightingCondition,
       recommendedSettings: exposureResult.recommendedSettings,
       alternativeSettings: exposureResult.alternativeSettings,
-      selectedSettings: selectedSettings,
+      originalSettings: selectedSettings, // The settings before editing
+      selectedSettings: editableSettings, // The final edited settings
       notes: notes.trim() || undefined
     }
 
@@ -46,6 +67,7 @@ export function GeneratedSettingsScreen() {
       setNotes('')
       setShowLogForm(false)
       setSelectedSettings(null)
+      setEditableSettings(null)
     } catch (error) {
       alert('Failed to save shot log. Please try again.')
     }
@@ -53,7 +75,42 @@ export function GeneratedSettingsScreen() {
 
   const handleSelectSettings = (settings: ExposureSettings) => {
     setSelectedSettings(settings)
+    setEditableSettings({ ...settings }) // Create a copy for editing
     setShowLogForm(true)
+  }
+
+  const handleApertureChange = (newAperture: number) => {
+    if (editableSettings && state.selectedLightingCondition) {
+      const newExposureDelta = calculateExposureDelta(
+        newAperture, 
+        editableSettings.shutterSpeed, 
+        editableSettings.iso, 
+        state.selectedLightingCondition.evValue
+      )
+      
+      setEditableSettings({
+        ...editableSettings,
+        aperture: newAperture,
+        exposureDelta: newExposureDelta
+      })
+    }
+  }
+
+  const handleShutterSpeedChange = (newShutterSpeed: number) => {
+    if (editableSettings && state.selectedLightingCondition) {
+      const newExposureDelta = calculateExposureDelta(
+        editableSettings.aperture, 
+        newShutterSpeed, 
+        editableSettings.iso, 
+        state.selectedLightingCondition.evValue
+      )
+      
+      setEditableSettings({
+        ...editableSettings,
+        shutterSpeed: newShutterSpeed,
+        exposureDelta: newExposureDelta
+      })
+    }
   }
 
   const formatShutterSpeed = (speed: number): string => {
@@ -94,6 +151,10 @@ export function GeneratedSettingsScreen() {
         <div className="setting-item">
           <span className="setting-label">ISO</span>
           <span className="setting-value">{settings.iso}</span>
+        </div>
+        <div className="setting-item">
+          <span className="setting-label">Exposure</span>
+          <span className="setting-value">{formatExposureDelta(settings.exposureDelta)}</span>
         </div>
       </div>
       {onSelect && (
@@ -161,13 +222,52 @@ export function GeneratedSettingsScreen() {
         )}
 
         {/* Log Shot Section */}
-        {showLogForm && selectedSettings && (
+        {showLogForm && selectedSettings && editableSettings && (
           <div className="log-shot-section">
             <div className="log-form">
               <h3>Log Selected Settings</h3>
-              <div className="selected-settings-summary">
-                <p><strong>Selected:</strong> f/{selectedSettings.aperture} • {formatShutterSpeed(selectedSettings.shutterSpeed)} • ISO {selectedSettings.iso}</p>
+              
+              {/* Editable Settings */}
+              <div className="editable-settings">
+                <h4>Adjust Settings (Optional)</h4>
+                <div className="settings-editor">
+                  <div className="setting-editor-group">
+                    <label htmlFor="aperture-select">Aperture</label>
+                    <select
+                      id="aperture-select"
+                      value={editableSettings.aperture}
+                      onChange={(e) => handleApertureChange(Number(e.target.value))}
+                    >
+                      {state.selectedLens?.availableApertures.map(aperture => (
+                        <option key={aperture} value={aperture}>
+                          f/{aperture}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="setting-editor-group">
+                    <label htmlFor="shutter-select">Shutter Speed</label>
+                    <select
+                      id="shutter-select"
+                      value={editableSettings.shutterSpeed}
+                      onChange={(e) => handleShutterSpeedChange(Number(e.target.value))}
+                    >
+                      {state.selectedCamera?.availableShutterSpeeds.map(speed => (
+                        <option key={speed} value={speed}>
+                          {formatShutterSpeed(speed)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="current-settings-display">
+                  <p><strong>Current:</strong> f/{editableSettings.aperture} • {formatShutterSpeed(editableSettings.shutterSpeed)} • ISO {editableSettings.iso} • {formatExposureDelta(editableSettings.exposureDelta)}</p>
+                  <p><strong>Original:</strong> f/{selectedSettings.aperture} • {formatShutterSpeed(selectedSettings.shutterSpeed)} • ISO {selectedSettings.iso} • {formatExposureDelta(selectedSettings.exposureDelta)}</p>
+                </div>
               </div>
+
               <div className="notes-section">
                 <label htmlFor="notes">Photo Description (Optional)</label>
                 <textarea
@@ -176,9 +276,10 @@ export function GeneratedSettingsScreen() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Describe the shot..."
                   rows={3}
-                  maxLength={500}
+                  maxLength={NOTES_MAX_LENGTH}
                 />
               </div>
+              
               <div className="form-actions">
                 <button 
                   className="cancel-button"
@@ -186,6 +287,7 @@ export function GeneratedSettingsScreen() {
                     setShowLogForm(false)
                     setNotes('')
                     setSelectedSettings(null)
+                    setEditableSettings(null)
                   }}
                 >
                   Cancel

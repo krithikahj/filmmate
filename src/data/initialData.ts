@@ -36,25 +36,51 @@ export const initialFilmStocks: FilmStock[] = [
     id: 'fujifilm-c200',
     name: 'Fujifilm C200',
     iso: 200,
-    type: 'Color'
+    type: 'Color',
+    latitude: {
+      over: 2,
+      under: 1
+    }
   },
   {
     id: 'kodak-portra-400',
     name: 'Kodak Portra 400',
     iso: 400,
-    type: 'Color'
+    type: 'Color',
+    latitude: {
+      over: 3,
+      under: 1.5
+    }
+  },
+  {
+    id: 'kodak-portra-800',
+    name: 'Kodak Portra 800',
+    iso: 800,
+    type: 'Color',
+    latitude: {
+      over: 3.5,
+      under: 1.5
+    }
   },
   {
     id: 'ilford-hp5-plus',
     name: 'Ilford HP5 Plus',
     iso: 400,
-    type: 'Black & White'
+    type: 'Black & White',
+    latitude: {
+      over: 4,
+      under: 2
+    }
   },
   {
     id: 'kodak-tri-x-400',
     name: 'Kodak Tri-X 400',
     iso: 400,
-    type: 'Black & White'
+    type: 'Black & White',
+    latitude: {
+      over: 5,
+      under: 2.5
+    }
   }
 ]
 

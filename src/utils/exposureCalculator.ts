@@ -30,18 +30,19 @@ export class ExposureCalculator {
       camera.availableShutterSpeeds,
       lens.availableApertures,
       iso,
-      targetExposureValue
+      targetExposureValue,
+      filmStock
     )
 
     if (validCombinations.length === 0) {
       throw new Error('No valid exposure combinations found for the given equipment and conditions')
     }
 
-    // Select recommended settings (balanced approach)
-    const recommendedSettings = this.selectRecommendedSettings(validCombinations)
+    // Select recommended settings (balanced approach with lens-specific aperture targeting)
+    const recommendedSettings = this.selectRecommendedSettings(validCombinations, lens)
 
     // Select alternative settings
-    const alternativeSettings = this.selectAlternativeSettings(validCombinations, recommendedSettings)
+    const alternativeSettings = this.selectAlternativeSettings(validCombinations, recommendedSettings, lens)
 
     return {
       recommendedSettings,
@@ -64,7 +65,8 @@ export class ExposureCalculator {
     shutterSpeeds: number[],
     apertures: number[],
     iso: number,
-    targetExposureValue: number
+    targetExposureValue: number,
+    filmStock: FilmStock
   ): ExposureSettings[] {
     const combinations: ExposureSettings[] = []
     const tolerance = 2.0 // Allow for realistic tolerance in photographic calculations
@@ -76,13 +78,18 @@ export class ExposureCalculator {
         // Calculate actual exposure value using the correct photographic formula
         // EV = log2(aperture² / shutter_speed) + log2(ISO/100)
         const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / 100)
+        const delta = actualExposureValue - targetExposureValue
         
         // Check if this combination is within tolerance of target
-        if (Math.abs(actualExposureValue - targetExposureValue) <= tolerance) {
+        if (Math.abs(delta) <= tolerance) {
+          // Check if exposure is within film latitude
+          this.isExposureWithinLatitude(delta, filmStock)
+          
           combinations.push({
             aperture,
             shutterSpeed,
-            iso
+            iso,
+            exposureDelta: parseFloat(delta.toFixed(2)) // Rounded for display purposes
           })
         }
       }
@@ -91,11 +98,23 @@ export class ExposureCalculator {
     return combinations
   }
 
-  private selectRecommendedSettings(combinations: ExposureSettings[]): ExposureSettings {
+  private isExposureWithinLatitude(delta: number, filmStock: FilmStock): boolean {
+    if (!filmStock.latitude) return true // If no latitude data, assume safe
+    
+    if (delta > 0) {
+      // Overexposed
+      return delta <= filmStock.latitude.over
+    } else {
+      // Underexposed
+      return Math.abs(delta) <= filmStock.latitude.under
+    }
+  }
+
+  private selectRecommendedSettings(combinations: ExposureSettings[], lens: Lens): ExposureSettings {
     // Sort combinations by how balanced they are (prefer middle-range apertures and shutter speeds)
     const sortedCombinations = combinations.sort((a, b) => {
-      const aScore = this.calculateBalanceScore(a)
-      const bScore = this.calculateBalanceScore(b)
+      const aScore = this.calculateBalanceScore(a, lens)
+      const bScore = this.calculateBalanceScore(b, lens)
       return bScore - aScore // Higher score first
     })
 
@@ -104,7 +123,8 @@ export class ExposureCalculator {
 
   private selectAlternativeSettings(
     combinations: ExposureSettings[],
-    recommended: ExposureSettings
+    recommended: ExposureSettings,
+    lens: Lens
   ): ExposureSettings[] {
     // Filter out the recommended settings and select up to 3 alternatives
     const alternatives = combinations.filter(
@@ -114,8 +134,8 @@ export class ExposureCalculator {
     // Sort by balance score and take top 3
     const sortedAlternatives = alternatives
       .sort((a, b) => {
-        const aScore = this.calculateBalanceScore(a)
-        const bScore = this.calculateBalanceScore(b)
+        const aScore = this.calculateBalanceScore(a, lens)
+        const bScore = this.calculateBalanceScore(b, lens)
         return bScore - aScore
       })
       .slice(0, 3)
@@ -123,24 +143,22 @@ export class ExposureCalculator {
     return sortedAlternatives
   }
 
-  private calculateBalanceScore(settings: ExposureSettings): number {
+  private calculateBalanceScore(settings: ExposureSettings, lens: Lens): number {
     // Prefer balanced settings (not extreme values)
     // Higher score for middle-range apertures and shutter speeds
-    const apertureScore = this.getApertureScore(settings.aperture)
+    const apertureScore = this.getApertureScore(settings.aperture, lens.availableApertures)
     const shutterScore = this.getShutterSpeedScore(settings.shutterSpeed)
     
     return apertureScore + shutterScore
   }
 
-  private getApertureScore(aperture: number): number {
-    // Prefer apertures between f/2.8 and f/11 for good balance
-    if (aperture >= 2.8 && aperture <= 11) {
-      return 10
-    } else if (aperture >= 2 && aperture <= 16) {
-      return 5
-    } else {
-      return 1
-    }
+  private getApertureScore(aperture: number, availableApertures: number[]): number {
+    // Dynamic aperture targeting based on available lens options
+    const sorted = availableApertures.sort((a, b) => a - b)
+    const midIndex = Math.floor(sorted.length / 2)
+
+    const diff = Math.abs(sorted.indexOf(aperture) - midIndex)
+    return 10 - diff // 10 if it's ideal, 9 if one stop away, etc.
   }
 
   private getShutterSpeedScore(shutterSpeed: number): number {

@@ -1,5 +1,5 @@
 import { ExposureCalculator } from './exposureCalculator'
-import { Camera, Lens, FilmStock, LightingCondition, ExposureSettings } from '../types'
+import { Camera, Lens, FilmStock, LightingCondition } from '../types'
 
 describe('ExposureCalculator', () => {
   const mockCamera: Camera = {
@@ -18,7 +18,11 @@ describe('ExposureCalculator', () => {
     id: 'test-film',
     name: 'Test Film',
     iso: 200,
-    type: 'Color'
+    type: 'Color',
+    latitude: {
+      over: 2,
+      under: 1
+    }
   }
 
   const mockLightingCondition: LightingCondition = {
@@ -46,6 +50,10 @@ describe('ExposureCalculator', () => {
         name: 'Sunny 16 Film',
         iso: 200,
         type: 'Color',
+        latitude: {
+          over: 2,
+          under: 1
+        }
       }
       const lighting: LightingCondition = {
         id: 'sunny16-light',
@@ -57,6 +65,7 @@ describe('ExposureCalculator', () => {
       expect(result.recommendedSettings.aperture).toBe(16)
       expect(result.recommendedSettings.shutterSpeed).toBe(200)
       expect(result.recommendedSettings.iso).toBe(200)
+      expect(result.recommendedSettings.exposureDelta).toBeDefined()
     })
 
     it('should calculate correct exposure settings for sunny 16 rule', () => {
@@ -70,8 +79,10 @@ describe('ExposureCalculator', () => {
 
       expect(result.recommendedSettings).toBeDefined()
       expect(result.recommendedSettings.iso).toBe(200)
+      expect(result.recommendedSettings.exposureDelta).toBeDefined()
       expect(result.alternativeSettings).toHaveLength(3)
       expect(result.alternativeSettings.every(settings => settings.iso === 200)).toBe(true)
+      expect(result.alternativeSettings.every(settings => settings.exposureDelta !== undefined)).toBe(true)
     })
 
     it('should return settings within available camera and lens ranges', () => {

@@ -15,6 +15,10 @@ export interface FilmStock {
   name: string
   iso: number
   type: 'Color' | 'Black & White'
+  latitude: {
+    over: number  // Stops of overexposure tolerance
+    under: number // Stops of underexposure tolerance
+  }
 }
 
 export interface LightingCondition {
@@ -28,6 +32,7 @@ export interface ExposureSettings {
   aperture: number
   shutterSpeed: number
   iso: number
+  exposureDelta?: number // stops away from target EV (positive = overexposed, negative = underexposed)
 }
 
 export interface ShotLog {
@@ -39,7 +44,8 @@ export interface ShotLog {
   lightingCondition: LightingCondition
   recommendedSettings: ExposureSettings
   alternativeSettings: ExposureSettings[]
-  selectedSettings: ExposureSettings
+  originalSettings: ExposureSettings // The settings before editing
+  selectedSettings: ExposureSettings // The final edited settings
   notes?: string
   rating?: number // 1-5 stars, optional
 }
@@ -54,7 +60,8 @@ export interface CreateShotLog {
   lightingCondition: LightingCondition
   recommendedSettings: ExposureSettings
   alternativeSettings: ExposureSettings[]
-  selectedSettings: ExposureSettings
+  originalSettings: ExposureSettings // The settings before editing
+  selectedSettings: ExposureSettings // The final edited settings
   notes?: string
   rating?: number
 }

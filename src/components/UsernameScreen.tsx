@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { checkUsernameExists, createUsername } from '../services/database'
 import './UsernameScreen.css'
 
@@ -24,11 +24,6 @@ export function UsernameScreen({ onUsernameSet }: UsernameScreenProps) {
   const [validation, setValidation] = useState<ValidationState>({ isValid: true, message: '' })
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [usernameExists, setUsernameExists] = useState<boolean | null>(null)
-
-  // Debug component mount
-  useEffect(() => {
-    // Component mounted
-  }, [])
 
   // Validate username format
   const validateUsername = (input: string): ValidationState => {

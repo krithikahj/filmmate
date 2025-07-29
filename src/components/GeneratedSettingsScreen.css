@@ -92,11 +92,12 @@
   margin-bottom: 1rem;
   font-size: 1.1rem;
   font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
 .settings-display {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -112,6 +113,7 @@
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-family: inherit;
 }
 
 .setting-value {
@@ -119,7 +121,7 @@
   color: #ffffff;
   font-size: 1.2rem;
   font-weight: 600;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-family: inherit;
 }
 
 /* Card Actions */
@@ -302,8 +304,8 @@
     padding: 1.5rem;
   }
   
-  .settings-display {
-    grid-template-columns: 1fr;
+  .settings-card .settings-display {
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.5rem;
   }
   
@@ -318,4 +320,34 @@
   .form-actions button {
     width: 100%;
   }
-} 
+}
+
+/* Specific overrides for settings cards */
+.settings-card .settings-display {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-card .setting-item {
+  text-align: center;
+}
+
+.settings-card .setting-label {
+  display: block;
+  color: #888888;
+  font-size: 0.7rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.settings-card .setting-value {
+  display: block;
+  color: #ccccccf4;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}

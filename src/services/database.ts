@@ -23,12 +23,6 @@ const SUPABASE_ERROR_CODES = {
 } as const
 
 // Types for database operations
-// Note: DatabaseUser interface is defined for future use when we need to return user data
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface DatabaseUser {
-  username: string
-  created_at: string
-}
 
 interface DatabaseShotLog {
   id: string
@@ -40,7 +34,8 @@ interface DatabaseShotLog {
   lighting_condition: LightingCondition
   recommended_settings: ExposureSettings
   alternative_settings: ExposureSettings[]
-  selected_settings: ExposureSettings
+  original_settings: ExposureSettings // Settings before editing
+  selected_settings: ExposureSettings // Final edited settings
   notes?: string
   rating?: number
   created_at: string
@@ -104,6 +99,7 @@ export async function saveShotLog(username: string, shotLog: CreateShotLog): Pro
       lighting_condition: shotLog.lightingCondition,
       recommended_settings: shotLog.recommendedSettings,
       alternative_settings: shotLog.alternativeSettings,
+      original_settings: shotLog.originalSettings,
       selected_settings: shotLog.selectedSettings,
       notes: shotLog.notes,
       rating: shotLog.rating,
@@ -135,6 +131,7 @@ export async function updateShotLog(username: string, shotLog: ShotLog): Promise
       lighting_condition: shotLog.lightingCondition,
       recommended_settings: shotLog.recommendedSettings,
       alternative_settings: shotLog.alternativeSettings,
+      original_settings: shotLog.originalSettings,
       selected_settings: shotLog.selectedSettings,
       notes: shotLog.notes,
       rating: shotLog.rating
@@ -178,6 +175,7 @@ export async function loadShotLogs(username: string): Promise<ShotLog[]> {
       lightingCondition: dbLog.lighting_condition,
       recommendedSettings: dbLog.recommended_settings,
       alternativeSettings: dbLog.alternative_settings,
+      originalSettings: dbLog.original_settings,
       selectedSettings: dbLog.selected_settings,
       notes: dbLog.notes,
       rating: dbLog.rating

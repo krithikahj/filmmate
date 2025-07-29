@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useFilmMate } from '../context/FilmMateContext'
 import { initialCameras, initialLenses, initialFilmStocks, initialLightingConditions } from '../data/initialData'
 import './SettingsScreen.css'

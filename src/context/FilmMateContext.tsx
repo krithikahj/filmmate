@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode, useCallback, useState, useEffect } from 'react'
+import { createContext, useContext, useReducer, ReactNode, useCallback, useState } from 'react'
 import { AppState, Camera, Lens, FilmStock, LightingCondition, ShotLog, CreateShotLog } from '../types'
 import { ExposureCalculator, ExposureCalculationResult } from '../utils/exposureCalculator'
 import { saveShotLog, updateShotLog as updateShotLogInDB, loadShotLogs as loadShotLogsFromDB } from '../services/database'
@@ -101,11 +101,6 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
   const [username, setUsernameState] = useState<string | null>(null)
   const exposureCalculator = new ExposureCalculator()
 
-  // Debug provider mount
-  useEffect(() => {
-    // Component mounted
-  }, [])
-
   // Action creators
   const setCamera = useCallback((camera: Camera) => {
     dispatch({ type: 'SET_CAMERA', payload: camera })
@@ -205,7 +200,7 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
         state.selectedLightingCondition!
       )
     } catch (error) {
-      console.error('Error calculating exposure:', error)
+      // Error calculating exposure
       return null
     }
   }, [state.selectedCamera, state.selectedLens, state.selectedFilmStock, state.selectedLightingCondition])

@@ -36,7 +36,7 @@ function AppContent() {
         }
       } catch (error) {
         // Continue with app even if database test fails
-        console.warn('Database connection test failed:', error)
+        // Database connection test failed
       } finally {
         setIsLoadingUsername(false)
       }
@@ -52,7 +52,7 @@ function AppContent() {
       setUsername(newUsername)
       setContextUsername(newUsername)
     } catch (error) {
-      console.error('Failed to save username to localStorage:', error)
+      // Failed to save username to localStorage
     }
   }, [setContextUsername])
 
@@ -76,7 +76,7 @@ function AppContent() {
       // Close modal
       setShowUserSwitchModal(false)
     } catch (error) {
-      console.error('Error switching user:', error)
+      // Error switching user
     }
   }, [clearAllData, setContextUsername])
 
