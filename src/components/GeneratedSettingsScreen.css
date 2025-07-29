@@ -182,6 +182,68 @@
   margin-top: 2rem;
 }
 
+/* Settings Editor Styles */
+.settings-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.setting-editor-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-editor-group label {
+  color: #cccccc;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.setting-editor-group select {
+  background: #1a1a1a;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.setting-editor-group select:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.current-settings-display {
+  background: #1a1a1a;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.current-settings-display p {
+  color: #cccccc;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  line-height: 1.4;
+}
+
+.current-settings-display strong {
+  color: #4a9eff;
+  font-weight: 500;
+}
+
+.editable-settings h4 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
 .log-form h3 {
   color: #ffffff;
   margin-bottom: 1rem;
@@ -304,21 +366,187 @@
     padding: 1.5rem;
   }
   
+  .settings-container h2 {
+    font-size: 1.5rem;
+  }
+  
+  .equipment-summary {
+    padding: 1rem;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .settings-card {
+    padding: 0.75rem;
+  }
+  
   .settings-card .settings-display {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.5rem;
+  }
+  
+  .setting-value {
+    font-size: 0.9rem;
+  }
+  
+  .setting-label {
+    font-size: 0.65rem;
+  }
+  
+  .card-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
   }
   
   .alternatives-grid {
     grid-template-columns: 1fr;
   }
   
+  .log-shot-section {
+    padding: 1rem;
+  }
+  
+  .log-form h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  
   .form-actions {
     flex-direction: column;
+    gap: 0.75rem;
   }
   
   .form-actions button {
     width: 100%;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .generated-settings-screen {
+    padding: 0.5rem;
+  }
+  
+  .settings-container {
+    padding: 1rem;
+  }
+  
+  .settings-container h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .equipment-summary {
+    padding: 0.75rem;
+  }
+  
+  .equipment-summary h3 {
+    font-size: 1.1rem;
+  }
+  
+  .settings-card {
+    padding: 0.5rem;
+  }
+  
+  .card-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .setting-value {
+    font-size: 0.8rem;
+  }
+  
+  .setting-label {
+    font-size: 0.6rem;
+  }
+  
+  .alternatives-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .log-shot-section {
+    padding: 0.75rem;
+  }
+  
+  .log-form h3 {
+    font-size: 1.1rem;
+  }
+  
+  .notes-section textarea {
+    padding: 0.625rem;
+    font-size: 0.85rem;
+    min-height: 80px;
+  }
+  
+  .form-actions button {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+  
+  /* Settings Editor Mobile Responsiveness */
+  .settings-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .setting-editor-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .setting-editor-group label {
+    color: #cccccc;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .setting-editor-group select {
+    background: #1a1a1a;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #ffffff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+  
+  .setting-editor-group select:focus {
+    outline: none;
+    border-color: #4a9eff;
+  }
+  
+  .current-settings-display {
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .current-settings-display p {
+    color: #cccccc;
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+    line-height: 1.4;
+  }
+  
+  .current-settings-display strong {
+    color: #4a9eff;
+    font-weight: 500;
+  }
+  
+  .editable-settings h4 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
   }
 }
 

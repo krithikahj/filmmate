@@ -94,4 +94,67 @@ main {
   .user-info {
     margin: 0.5rem 1rem;
   }
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .App-header {
+    padding: 1rem 0;
+  }
+  
+  .App-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .App-header p {
+    font-size: 0.9rem;
+  }
+  
+  main {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .App-header p {
+    font-size: 0.8rem;
+  }
+  
+  main {
+    padding: 0.5rem;
+  }
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 768px) {
+  /* Ensure buttons and interactive elements are large enough for touch */
+  button, select, input, textarea {
+    min-height: 44px; /* Apple's recommended minimum touch target size */
+  }
+  
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Improve text readability on small screens */
+  * {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Better spacing for mobile */
+  .settings-card, .log-card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Ensure modals are properly sized */
+  .log-detail-modal {
+    width: 95vw;
+    max-width: none;
+  }
 } 
