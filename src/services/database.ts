@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { ShotLog, CreateShotLog, Camera, Lens, FilmStock, LightingCondition, ExposureSettings } from '../types'
 
-// TODO: Replace with your actual Supabase URL and anon key
-// You'll need to create a free account at https://supabase.com
-const SUPABASE_URL = 'https://qldzxapnbrnhmzktbpye.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZHp4YXBuYnJuaG16a3RicHllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3Mjc0MDAsImV4cCI6MjA2OTMwMzQwMH0.8ZHrqI-WQT_4Th0p1YWNTZtibOJmfvx8DNVMQSvaCjI'
+// Supabase configuration from environment variables
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error('Missing Supabase environment variables. Please check your .env file.')
+}
 
 // Create Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
