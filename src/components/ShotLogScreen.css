@@ -454,6 +454,13 @@
   border-top: 1px solid #404040;
 }
 
+/* Center rating in detail modal */
+.detail-section .star-rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .shot-log-screen {
