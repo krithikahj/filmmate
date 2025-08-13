@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { FilmMateProvider } from './context/FilmMateContext'
 import { Navigation, Screen } from './components/Navigation'
 import { SettingsScreen } from './components/SettingsScreen'
@@ -8,10 +8,10 @@ import { UsernameScreen } from './components/UsernameScreen'
 import { UserSwitchModal } from './components/UserSwitchModal'
 import { useFilmMate } from './context/FilmMateContext'
 import { testDatabaseConnection } from './services/database'
+import { APP_CONSTANTS } from './utils/constants'
 import './App.css'
 
-// Local storage key for username
-const USERNAME_STORAGE_KEY = 'filmate-username'
+const USERNAME_STORAGE_KEY = APP_CONSTANTS.USERNAME_STORAGE_KEY
 
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('settings')
@@ -35,8 +35,8 @@ function AppContent() {
           setContextUsername(savedUsername)
         }
       } catch (error) {
+        console.error('Database connection test failed:', error)
         // Continue with app even if database test fails
-        // Database connection test failed
       } finally {
         setIsLoadingUsername(false)
       }
@@ -46,18 +46,18 @@ function AppContent() {
   }, [setContextUsername])
 
   // Handle username setup
-  const handleUsernameSet = useCallback((newUsername: string) => {
+  const handleUsernameSet = (newUsername: string) => {
     try {
       localStorage.setItem(USERNAME_STORAGE_KEY, newUsername)
       setUsername(newUsername)
       setContextUsername(newUsername)
     } catch (error) {
-      // Failed to save username to localStorage
+      console.error('Failed to save username to localStorage:', error)
     }
-  }, [setContextUsername])
+  }
 
   // Handle user switching
-  const handleSwitchUser = useCallback((newUsername: string) => {
+  const handleSwitchUser = (newUsername: string) => {
     try {
       // Clear current user's selections and data
       clearAllData()
@@ -76,26 +76,26 @@ function AppContent() {
       // Close modal
       setShowUserSwitchModal(false)
     } catch (error) {
-      // Error switching user
+      console.error('Error switching user:', error)
     }
-  }, [clearAllData, setContextUsername])
+  }
 
-  const handleScreenChange = useCallback((screen: Screen) => {
+  const handleScreenChange = (screen: Screen) => {
     setCurrentScreen(screen)
-  }, [])
+  }
 
-  const handleNavigateToResults = useCallback(() => {
+  const handleNavigateToResults = () => {
     setCurrentScreen('generated')
     setCanShowGenerated(true)
-  }, [])
+  }
 
-  const handleOpenUserSwitch = useCallback(() => {
+  const handleOpenUserSwitch = () => {
     setShowUserSwitchModal(true)
-  }, [])
+  }
 
-  const handleCloseUserSwitch = useCallback(() => {
+  const handleCloseUserSwitch = () => {
     setShowUserSwitchModal(false)
-  }, [])
+  }
 
   // Show loading state while checking for saved username
   if (isLoadingUsername) {

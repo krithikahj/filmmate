@@ -23,7 +23,7 @@ export function ShotLogScreen() {
       try {
         await loadShotLogs()
       } catch (error) {
-        // Error loading shot logs
+        console.error('Error loading shot logs:', error)
       }
     }
     loadLogs()
@@ -62,7 +62,7 @@ export function ShotLogScreen() {
       try {
         await updateShotLog(newLog)
       } catch (error) {
-        // Error updating shot log rating
+        console.error('Error updating shot log rating:', error)
       }
     }
   }

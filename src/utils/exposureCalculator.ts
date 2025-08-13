@@ -1,4 +1,5 @@
 import { Camera, Lens, FilmStock, LightingCondition, ExposureSettings } from '../types'
+import { EXPOSURE_CONSTANTS } from './constants'
 
 export interface ExposureCalculationResult {
   recommendedSettings: ExposureSettings
@@ -69,7 +70,7 @@ export class ExposureCalculator {
     filmStock: FilmStock
   ): ExposureSettings[] {
     const combinations: ExposureSettings[] = []
-    const tolerance = 2.0 // Allow for realistic tolerance in photographic calculations
+    // Allow for realistic tolerance in photographic calculations
 
     for (const shutterSpeed of shutterSpeeds) {
       for (const aperture of apertures) {
@@ -77,11 +78,11 @@ export class ExposureCalculator {
         const shutter = 1 / shutterSpeed
         // Calculate actual exposure value using the correct photographic formula
         // EV = log2(aperture² / shutter_speed) + log2(ISO/100)
-        const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / 100)
+        const actualExposureValue = this.calculateExposureValue(aperture, shutter, iso)
         const delta = actualExposureValue - targetExposureValue
         
         // Check if this combination is within tolerance of target
-        if (Math.abs(delta) <= tolerance) {
+        if (this.isExposureWithinTolerance(actualExposureValue, targetExposureValue)) {
           // Check if exposure is within film latitude
           this.isExposureWithinLatitude(delta, filmStock)
           
@@ -96,6 +97,17 @@ export class ExposureCalculator {
     }
 
     return combinations
+  }
+
+  private calculateExposureValue(aperture: number, shutter: number, iso: number): number {
+    // EV = log2(aperture² / shutter_speed) + log2(ISO/100)
+    const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / EXPOSURE_CONSTANTS.ISO_BASE_VALUE)
+    return actualExposureValue
+  }
+
+  private isExposureWithinTolerance(actualEV: number, targetEV: number): boolean {
+    const tolerance = EXPOSURE_CONSTANTS.TOLERANCE // Allow for realistic tolerance in photographic calculations
+    return Math.abs(actualEV - targetEV) <= tolerance
   }
 
   private isExposureWithinLatitude(delta: number, filmStock: FilmStock): boolean {
@@ -163,14 +175,15 @@ export class ExposureCalculator {
 
   private getShutterSpeedScore(shutterSpeed: number): number {
     // Prefer shutter speeds between 1/30 and 1/500 for good balance
-    if (shutterSpeed >= 30 && shutterSpeed <= 500) {
-      return 10
-    } else if (shutterSpeed >= 15 && shutterSpeed <= 1000) {
-      return 5
-    } else {
+    if (shutterSpeed >= EXPOSURE_CONSTANTS.PREFERRED_SHUTTER_MIN && shutterSpeed <= EXPOSURE_CONSTANTS.PREFERRED_SHUTTER_MAX) {
       return 1
+    } else if (shutterSpeed >= EXPOSURE_CONSTANTS.ACCEPTABLE_SHUTTER_MIN && shutterSpeed <= EXPOSURE_CONSTANTS.ACCEPTABLE_SHUTTER_MAX) {
+      return 0.5
     }
+    return 0
   }
+
+
 
   private isSameSettings(a: ExposureSettings, b: ExposureSettings): boolean {
     return a.aperture === b.aperture && 

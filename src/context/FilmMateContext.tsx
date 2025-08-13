@@ -102,26 +102,26 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
   const exposureCalculator = new ExposureCalculator()
 
   // Action creators
-  const setCamera = useCallback((camera: Camera) => {
+  const setCamera = (camera: Camera) => {
     dispatch({ type: 'SET_CAMERA', payload: camera })
-  }, [])
+  }
 
-  const setLens = useCallback((lens: Lens) => {
+  const setLens = (lens: Lens) => {
     dispatch({ type: 'SET_LENS', payload: lens })
-  }, [])
+  }
 
-  const setFilmStock = useCallback((filmStock: FilmStock) => {
+  const setFilmStock = (filmStock: FilmStock) => {
     dispatch({ type: 'SET_FILM_STOCK', payload: filmStock })
-  }, [])
+  }
 
-  const setLightingCondition = useCallback((lightingCondition: LightingCondition) => {
+  const setLightingCondition = (lightingCondition: LightingCondition) => {
     dispatch({ type: 'SET_LIGHTING_CONDITION', payload: lightingCondition })
-  }, [])
+  }
 
   // Set username for database operations
-  const setUsername = useCallback((newUsername: string) => {
+  const setUsername = (newUsername: string) => {
     setUsernameState(newUsername)
-  }, [])
+  }
 
   const addShotLog = useCallback(async (shotLog: CreateShotLog) => {
     if (!username) {
@@ -178,13 +178,13 @@ export function FilmMateProvider({ children }: FilmMateProviderProps) {
     }
   }, [username])
 
-  const clearSelections = useCallback(() => {
+  const clearSelections = () => {
     dispatch({ type: 'CLEAR_SELECTIONS' })
-  }, [])
+  }
 
-  const clearAllData = useCallback(() => {
+  const clearAllData = () => {
     dispatch({ type: 'CLEAR_ALL_DATA' })
-  }, [])
+  }
 
   // Calculate exposure if all inputs are selected
   const calculateExposure = useCallback((): ExposureCalculationResult | null => {

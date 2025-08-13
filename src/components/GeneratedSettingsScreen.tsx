@@ -1,25 +1,21 @@
 import { useState } from 'react'
 import { useFilmMate } from '../context/FilmMateContext'
 import { ExposureSettings, CreateShotLog } from '../types'
+import { APP_CONSTANTS, EXPOSURE_CONSTANTS } from '../utils/constants'
 import './GeneratedSettingsScreen.css'
 
-// Constants
-const NOTES_MAX_LENGTH = 500
-const ISO_BASE_VALUE = 100
+const NOTES_MAX_LENGTH = APP_CONSTANTS.NOTES_MAX_LENGTH
 
 // Add this helper function at the top
 const formatExposureDelta = (delta?: number): string => {
-  if (delta === undefined || delta === 0) {
-    return 'Perfect Exposure'
-  }
-  const sign = delta > 0 ? '+' : ''
-  return `${sign}${delta}`
+  if (delta === undefined || delta === null) return 'N/A'
+  if (Math.abs(delta) < 0.1) return 'Perfect'
+  return `${delta > 0 ? '+' : ''}${delta.toFixed(1)} EV`
 }
 
-// Function to calculate exposure delta for custom settings
 const calculateExposureDelta = (aperture: number, shutterSpeed: number, iso: number, targetEV: number): number => {
   const shutter = 1 / shutterSpeed
-  const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / ISO_BASE_VALUE)
+  const actualExposureValue = Math.log2(Math.pow(aperture, 2) / shutter) + Math.log2(iso / EXPOSURE_CONSTANTS.ISO_BASE_VALUE)
   const delta = actualExposureValue - targetEV
   return parseFloat(delta.toFixed(2))
 }
@@ -69,7 +65,7 @@ export function GeneratedSettingsScreen() {
       setSelectedSettings(null)
       setEditableSettings(null)
     } catch (error) {
-      alert('Failed to save shot log. Please try again.')
+      console.error('Failed to save shot log:', error)
     }
   }
 

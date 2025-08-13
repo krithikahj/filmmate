@@ -1,12 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { checkUsernameExists, createUsername } from '../services/database'
+import { APP_CONSTANTS } from '../utils/constants'
 import './UsernameScreen.css'
 
-
-
-// Validation constants
-const USERNAME_MIN_LENGTH = 3
-const USERNAME_MAX_LENGTH = 20
+const USERNAME_MIN_LENGTH = APP_CONSTANTS.USERNAME_MIN_LENGTH
+const USERNAME_MAX_LENGTH = APP_CONSTANTS.USERNAME_MAX_LENGTH
 const USERNAME_PATTERN = /^[a-zA-Z0-9_-]+$/
 
 interface UsernameScreenProps {

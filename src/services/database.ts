@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { ShotLog, CreateShotLog, Camera, Lens, FilmStock, LightingCondition, ExposureSettings } from '../types'
+import { Camera, Lens, FilmStock, LightingCondition, ExposureSettings, ShotLog, CreateShotLog } from '../types'
+import { DATABASE_CONSTANTS } from '../utils/constants'
 
 // Supabase configuration from environment variables
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
@@ -16,15 +17,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 
 // Database table names
-const TABLES = {
-  USERS: 'users',
-  SHOT_LOGS: 'shot_logs'
-} as const
-
-// Supabase error codes
-const SUPABASE_ERROR_CODES = {
-  NOT_FOUND: 'PGRST116'
-} as const
+const TABLES = DATABASE_CONSTANTS.TABLES
+const SUPABASE_ERROR_CODES = DATABASE_CONSTANTS.SUPABASE_ERROR_CODES
 
 // Types for database operations
 
@@ -46,40 +40,32 @@ interface DatabaseShotLog {
 }
 
 /**
- * Check if a username exists in the database
+ * Check if a username already exists in the database
  */
 export async function checkUsernameExists(username: string): Promise<boolean> {
-  try {
-    const { data, error } = await supabase
-      .from(TABLES.USERS)
-      .select('username')
-      .eq('username', username)
-      .single()
+  const { data, error } = await supabase
+    .from(TABLES.USERS)
+    .select('username')
+    .eq('username', username)
+    .single()
 
-    if (error && error.code !== SUPABASE_ERROR_CODES.NOT_FOUND) { // PGRST116 is "not found" error
-      throw error
-    }
-
-    const exists = !!data
-    return exists
-  } catch (error) {
+  if (error && error.code !== SUPABASE_ERROR_CODES.NOT_FOUND) { // PGRST116 is "not found" error
     throw error
   }
+
+  const exists = !!data
+  return exists
 }
 
 /**
  * Create a new username in the database
  */
 export async function createUsername(username: string): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from(TABLES.USERS)
-      .insert([{ username }])
+  const { error } = await supabase
+    .from(TABLES.USERS)
+    .insert([{ username }])
 
-    if (error) {
-      throw error
-    }
-  } catch (error) {
+  if (error) {
     throw error
   }
 }
@@ -93,31 +79,27 @@ export async function saveShotLog(username: string, shotLog: CreateShotLog): Pro
     throw new Error('Missing required shot log data')
   }
   
-  try {
-    const dbShotLog: Omit<DatabaseShotLog, 'id'> = {
-      username,
-      timestamp: shotLog.timestamp.toISOString(),
-      camera: shotLog.camera,
-      lens: shotLog.lens,
-      film_stock: shotLog.filmStock,
-      lighting_condition: shotLog.lightingCondition,
-      recommended_settings: shotLog.recommendedSettings,
-      alternative_settings: shotLog.alternativeSettings,
-      original_settings: shotLog.originalSettings,
-      selected_settings: shotLog.selectedSettings,
-      notes: shotLog.notes,
-      rating: shotLog.rating,
-      created_at: new Date().toISOString()
-    }
+  const dbShotLog: Omit<DatabaseShotLog, 'id'> = {
+    username,
+    timestamp: shotLog.timestamp.toISOString(),
+    camera: shotLog.camera,
+    lens: shotLog.lens,
+    film_stock: shotLog.filmStock,
+    lighting_condition: shotLog.lightingCondition,
+    recommended_settings: shotLog.recommendedSettings,
+    alternative_settings: shotLog.alternativeSettings,
+    original_settings: shotLog.originalSettings,
+    selected_settings: shotLog.selectedSettings,
+    notes: shotLog.notes,
+    rating: shotLog.rating,
+    created_at: new Date().toISOString()
+  }
 
-    const { error } = await supabase
-      .from(TABLES.SHOT_LOGS)
-      .insert([dbShotLog])
+  const { error } = await supabase
+    .from(TABLES.SHOT_LOGS)
+    .insert([dbShotLog])
 
-    if (error) {
-      throw error
-    }
-  } catch (error) {
+  if (error) {
     throw error
   }
 }
@@ -126,31 +108,27 @@ export async function saveShotLog(username: string, shotLog: CreateShotLog): Pro
  * Update an existing shot log in the database
  */
 export async function updateShotLog(username: string, shotLog: ShotLog): Promise<void> {
-  try {
-    const dbShotLog: Partial<DatabaseShotLog> = {
-      timestamp: shotLog.timestamp.toISOString(),
-      camera: shotLog.camera,
-      lens: shotLog.lens,
-      film_stock: shotLog.filmStock,
-      lighting_condition: shotLog.lightingCondition,
-      recommended_settings: shotLog.recommendedSettings,
-      alternative_settings: shotLog.alternativeSettings,
-      original_settings: shotLog.originalSettings,
-      selected_settings: shotLog.selectedSettings,
-      notes: shotLog.notes,
-      rating: shotLog.rating
-    }
+  const dbShotLog: Partial<DatabaseShotLog> = {
+    timestamp: shotLog.timestamp.toISOString(),
+    camera: shotLog.camera,
+    lens: shotLog.lens,
+    film_stock: shotLog.filmStock,
+    lighting_condition: shotLog.lightingCondition,
+    recommended_settings: shotLog.recommendedSettings,
+    alternative_settings: shotLog.alternativeSettings,
+    original_settings: shotLog.originalSettings,
+    selected_settings: shotLog.selectedSettings,
+    notes: shotLog.notes,
+    rating: shotLog.rating
+  }
 
-    const { error } = await supabase
-      .from(TABLES.SHOT_LOGS)
-      .update(dbShotLog)
-      .eq('id', shotLog.id)
-      .eq('username', username)
+  const { error } = await supabase
+    .from(TABLES.SHOT_LOGS)
+    .update(dbShotLog)
+    .eq('id', shotLog.id)
+    .eq('username', username)
 
-    if (error) {
-      throw error
-    }
-  } catch (error) {
+  if (error) {
     throw error
   }
 }
@@ -159,53 +137,45 @@ export async function updateShotLog(username: string, shotLog: ShotLog): Promise
  * Load all shot logs for a username from the database
  */
 export async function loadShotLogs(username: string): Promise<ShotLog[]> {
-  try {
-    const { data, error } = await supabase
-      .from(TABLES.SHOT_LOGS)
-      .select('*')
-      .eq('username', username)
-      .order('timestamp', { ascending: false })
+  const { data, error } = await supabase
+    .from(TABLES.SHOT_LOGS)
+    .select('*')
+    .eq('username', username)
+    .order('timestamp', { ascending: false })
 
-    if (error) {
-      throw error
-    }
-
-    const shotLogs: ShotLog[] = (data || []).map((dbLog: DatabaseShotLog) => ({
-      id: dbLog.id,
-      timestamp: new Date(dbLog.timestamp),
-      camera: dbLog.camera,
-      lens: dbLog.lens,
-      filmStock: dbLog.film_stock,
-      lightingCondition: dbLog.lighting_condition,
-      recommendedSettings: dbLog.recommended_settings,
-      alternativeSettings: dbLog.alternative_settings,
-      originalSettings: dbLog.original_settings,
-      selectedSettings: dbLog.selected_settings,
-      notes: dbLog.notes,
-      rating: dbLog.rating
-    }))
-
-    return shotLogs
-  } catch (error) {
+  if (error) {
     throw error
   }
+
+  const shotLogs: ShotLog[] = (data || []).map((dbLog: DatabaseShotLog) => ({
+    id: dbLog.id,
+    timestamp: new Date(dbLog.timestamp),
+    camera: dbLog.camera,
+    lens: dbLog.lens,
+    filmStock: dbLog.film_stock,
+    lightingCondition: dbLog.lighting_condition,
+    recommendedSettings: dbLog.recommended_settings,
+    alternativeSettings: dbLog.alternative_settings,
+    originalSettings: dbLog.original_settings,
+    selectedSettings: dbLog.selected_settings,
+    notes: dbLog.notes,
+    rating: dbLog.rating
+  }))
+
+  return shotLogs
 }
 
 /**
  * Delete a shot log from the database
  */
 export async function deleteShotLog(username: string, logId: string): Promise<void> {
-  try {
-    const { error } = await supabase
-      .from(TABLES.SHOT_LOGS)
-      .delete()
-      .eq('id', logId)
-      .eq('username', username)
+  const { error } = await supabase
+    .from(TABLES.SHOT_LOGS)
+    .delete()
+    .eq('id', logId)
+    .eq('username', username)
 
-    if (error) {
-      throw error
-    }
-  } catch (error) {
+  if (error) {
     throw error
   }
 }
@@ -227,34 +197,30 @@ export async function initializeDatabase(): Promise<void> {
  * Test database connection and log current status
  */
 export async function testDatabaseConnection(): Promise<void> {
-  try {
-    // Test a simple query to check connection
-    const { error } = await supabase
-      .from(TABLES.USERS)
-      .select('count')
-      .limit(1)
-    
-    if (error) {
-      // Check if it's a table doesn't exist error
-      if (error.message && error.message.includes('relation "users" does not exist')) {
-        throw new Error('Database tables not found. Please create the users and shot_logs tables in your Supabase dashboard.')
-      }
-      throw error
+  // Test a simple query to check connection
+  const { error } = await supabase
+    .from(TABLES.USERS)
+    .select('count')
+    .limit(1)
+  
+  if (error) {
+    // Check if it's a table doesn't exist error
+    if (error.message && error.message.includes('relation "users" does not exist')) {
+      throw new Error('Database tables not found. Please create the users and shot_logs tables in your Supabase dashboard.')
     }
-    
-    // Also test the shot_logs table
-    const { error: shotLogsError } = await supabase
-      .from(TABLES.SHOT_LOGS)
-      .select('count')
-      .limit(1)
-    
-    if (shotLogsError) {
-      if (shotLogsError.message && shotLogsError.message.includes('relation "shot_logs" does not exist')) {
-        throw new Error('Shot logs table not found. Please create the shot_logs table in your Supabase dashboard.')
-      }
-      throw shotLogsError
-    }
-  } catch (error) {
     throw error
+  }
+  
+  // Also test the shot_logs table
+  const { error: shotLogsError } = await supabase
+    .from(TABLES.SHOT_LOGS)
+    .select('count')
+    .limit(1)
+  
+  if (shotLogsError) {
+    if (shotLogsError.message && shotLogsError.message.includes('relation "shot_logs" does not exist')) {
+      throw new Error('Shot logs table not found. Please create the shot_logs table in your Supabase dashboard.')
+    }
+    throw shotLogsError
   }
 } 
