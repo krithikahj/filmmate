@@ -1,6 +1,7 @@
-# FilmMate
+# FilmMate - Film Photography Exposure Assistant
 
-A web-based film photography assistant that helps photographers determine optimal camera settings based on their equipment and shooting conditions.
+<!-- Deployment trigger update -->
+FilmMate helps novice film photographers determine optimal camera settings based on their equipment and shooting conditions.
 
 ## Features
 
